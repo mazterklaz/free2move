@@ -14,7 +14,9 @@ case class Order(orderId: String,
                  orderDeliveredCustomerDate: Option[Timestamp],
                  orderEstimatedDeliveryDate: Timestamp,
                  purchaseDate: Date
-                )
+                ) {
+  def isBetween(startDate: String, endDate: String): Boolean = purchaseDate.toString >= startDate && endDate <= endDate
+}
 
 object Order extends CsvEncoder[Order] {
 

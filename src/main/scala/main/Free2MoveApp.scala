@@ -22,7 +22,7 @@ object Free2MoveApp extends App {
 
   val customerDS: Dataset[Customer] = new CustomerReader(sparkSession, appConfig).readCsv.flatMap(_.result)
 
-  val orderDS: Dataset[Order] = new OrderReader(sparkSession, appConfig).readCsv.flatMap(_.result).filter(_.purchaseDate.toString == appConfig.dt)
+  val orderDS: Dataset[Order] = new OrderReader(sparkSession, appConfig).readCsv.flatMap(_.result).filter(_.isBetween(appConfig.startDate, appConfig.endDate))
 
   val itemDS: Dataset[Item] = new ItemReader(sparkSession, appConfig).readCsv.flatMap(_.result)
 

@@ -7,7 +7,8 @@ case class AppConfig(customerPath: String,
                      itemsPath: String,
                      ordersPath: String,
                      productsPath: String,
-                     dt: String,
+                     startDate: String,
+                     endDate: String,
                      customerSpendingStatisticsPath: String,
                      customerOrdersStatisticsPath: String
                     )

@@ -1,5 +1,6 @@
 package data.statistics
 
+import com.typesafe.scalalogging.LazyLogging
 import config.AppConfig
 import data.customer.model.Customer
 import data.item.model.Item
@@ -7,7 +8,9 @@ import data.order.model.Order
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 
-class CustomerStatistics(dataset: Dataset[(Item, Order, Customer)], appConfig: AppConfig) {
+import java.time.Instant
+
+class CustomerStatistics(dataset: Dataset[(Item, Order, Customer)], appConfig: AppConfig) extends LazyLogging {
 
   import dataset.sparkSession.implicits._
 
@@ -28,30 +31,37 @@ class CustomerStatistics(dataset: Dataset[(Item, Order, Customer)], appConfig: A
     .orderBy($"nb_orders".desc)
 
 
-  def writeSpending(numPartitions: Int = 1): Unit = customerSpendingDF
-    .coalesce(numPartitions)
+  def writeSpending(): Unit = customerSpendingDF
+    .repartition($"purchaseDate")
     .write
     .partitionBy("purchaseDate")
     .mode(SaveMode.Overwrite)
     .csv(appConfig.customerSpendingStatisticsPath)
 
-  def writeOrders(numPartitions: Int = 1): Unit = customerOrderDF
-    .coalesce(numPartitions)
+  def writeOrders(): Unit = customerOrderDF
+    .repartition($"purchaseDate")
     .write
     .partitionBy("purchaseDate")
     .mode(SaveMode.Overwrite)
     .csv(appConfig.customerOrdersStatisticsPath)
 
-  def writeAll(numPartitions: Int = 1): Unit = {
+  def writeAll(): Unit = {
+
     new Thread {
       override def run(): Unit = {
-        writeSpending(numPartitions)
+        val t0 = Instant.now().getEpochSecond
+        logger.info("Start writing spending statistics")
+        writeSpending()
+        logger.info(s"Write spending finish in ${Instant.now().getEpochSecond - t0} seconds")
       }
     }.start()
 
     new Thread {
       override def run(): Unit = {
-        writeOrders(numPartitions)
+        val t0 = Instant.now().getEpochSecond
+        logger.info("Start writing orders statistics")
+        writeOrders()
+        logger.info(s"Write orders finish in ${Instant.now().getEpochSecond - t0} seconds")
       }
     }.start()
   }
