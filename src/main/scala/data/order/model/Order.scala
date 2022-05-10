@@ -3,7 +3,7 @@ package data.order.model
 import data.csv.{CsvEncoder, Result, Utils}
 import data.error.{DataError, Message}
 
-import java.sql.Timestamp
+import java.sql.{Date, Timestamp}
 
 case class Order(orderId: String,
                  customerId: String,
@@ -12,7 +12,8 @@ case class Order(orderId: String,
                  orderApprovedAt: Option[Timestamp],
                  orderDeliveredCarrierDate: Option[Timestamp],
                  orderDeliveredCustomerDate: Option[Timestamp],
-                 orderEstimatedDeliveryDate: Timestamp
+                 orderEstimatedDeliveryDate: Timestamp,
+                 purchaseDate: Date
                 )
 
 object Order extends CsvEncoder[Order] {
@@ -24,16 +25,19 @@ object Order extends CsvEncoder[Order] {
     line.split(",") match {
       case Array(orderId, customerId, orderStatus, orderPurchaseTimestamp, orderApprovedAt, orderDeliveredCarrierDate, orderDeliveredCustomerDate, orderEstimatedDeliveryDate) if isValid(orderApprovedAt, orderStatus) ⇒
 
+        val purchaseTimestamp = Utils.stringToTimestamp(orderPurchaseTimestamp)
+
         Result(
           Order(
             orderId = Utils.removeQuotes(orderId),
             customerId = Utils.removeQuotes(customerId),
             orderStatus = orderStatus,
-            orderPurchaseTimestamp = Utils.stringToTimestamp(orderPurchaseTimestamp),
+            orderPurchaseTimestamp = purchaseTimestamp,
             orderApprovedAt = Utils.stringToOptTimestamp(orderApprovedAt),
             orderDeliveredCarrierDate = Utils.stringToOptTimestamp(orderDeliveredCarrierDate),
             orderDeliveredCustomerDate = Utils.stringToOptTimestamp(orderDeliveredCustomerDate),
             orderEstimatedDeliveryDate = Utils.stringToTimestamp(orderEstimatedDeliveryDate),
+            purchaseDate = Utils.timestampToDate(purchaseTimestamp)
           ))
       case Array(orderId, _, orderStatus, _, orderApprovedAt, _, _, _) ⇒
         val errors = (orderApprovedAt.isEmpty, orderStatus == "canceled") match {

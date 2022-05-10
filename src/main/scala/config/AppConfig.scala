@@ -6,10 +6,13 @@ import pureconfig.generic.auto._
 case class AppConfig(customerPath: String,
                      itemsPath: String,
                      ordersPath: String,
-                     productsPath: String
+                     productsPath: String,
+                     dt: String,
+                     customerSpendingStatisticsPath: String,
+                     customerOrdersStatisticsPath: String
                     )
 
-object AppConfig{
+object AppConfig {
   def apply(): AppConfig = ConfigSource.default.load[AppConfig]
     .fold(
       { failure ⇒ throw new Exception(failure.prettyPrint()) },

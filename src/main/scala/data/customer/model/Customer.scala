@@ -6,17 +6,17 @@ import data.error.{DataError, Message}
 case class Customer(customerId: String,
                     customerUniqueId: String,
                     customerZipCodePrefix: String,
-                    customer_city: String,
-                    customer_state: String
+                    customerCity: String,
+                    customerState: String
                    )
 
-object Customer extends CsvEncoder[Customer]{
+object Customer extends CsvEncoder[Customer] {
 
   override val HEADER = "\"customer_id\",\"customer_unique_id\",\"customer_zip_code_prefix\",\"customer_city\",\"customer_state\""
 
-  override def fromCsvLine(line: String): Result[Customer] = if(line == HEADER) Result(DataError(line))
+  override def fromCsvLine(line: String): Result[Customer] = if (line == HEADER) Result(DataError(line))
 
-  else{
+  else {
     line.split(",") match {
       case Array(customerId, customerUniqueId, customerZipCodePrefix, customerCity, customerState) if Customer.isValid(customerCity, customerUniqueId) ⇒
         Result(Customer(customerId, customerUniqueId, customerZipCodePrefix, customerCity, customerState))
