@@ -30,10 +30,21 @@ class CustomerStatistics(dataset: Dataset[(Item, Order, Customer)], appConfig: A
     .agg(count("orderId").as("nb_orders"))
     .orderBy($"nb_orders".desc)
 
+  lazy val nbCustomerRepeaterDF: DataFrame = dataset
+    .rdd
+    .map { case (_, order, customer: Customer) ⇒ customer.customerId -> order }
+    .groupBy(_._1)
+    .map { case ((customerId, iterable)) ⇒
+      customerId -> iterable.map(_._2.purchaseDate.toString).toSeq.distinct.size
+    }
+    .filter(_._2 > 1)
+    .toDF("customerId", "repeated_orders")
+
 
   def writeSpending(): Unit = customerSpendingDF
     .repartition($"purchaseDate")
     .write
+    .option("header", "true")
     .partitionBy("purchaseDate")
     .mode(SaveMode.Overwrite)
     .csv(appConfig.customerSpendingStatisticsPath)
@@ -41,9 +52,18 @@ class CustomerStatistics(dataset: Dataset[(Item, Order, Customer)], appConfig: A
   def writeOrders(): Unit = customerOrderDF
     .repartition($"purchaseDate")
     .write
+    .option("header", "true")
     .partitionBy("purchaseDate")
     .mode(SaveMode.Overwrite)
     .csv(appConfig.customerOrdersStatisticsPath)
+
+  def writeRepeaters() = nbCustomerRepeaterDF
+    .coalesce(1)
+    .orderBy($"repeated_orders".desc)
+    .write
+    .option("header", "true")
+    .mode(SaveMode.Overwrite)
+    .csv(appConfig.customerRepeatersStatisticsPath)
 
   def writeAll(): Unit = {
 
@@ -62,6 +82,15 @@ class CustomerStatistics(dataset: Dataset[(Item, Order, Customer)], appConfig: A
         logger.info("Start writing orders statistics")
         writeOrders()
         logger.info(s"Write orders finish in ${Instant.now().getEpochSecond - t0} seconds")
+      }
+    }.start()
+
+    new Thread {
+      override def run(): Unit = {
+        val t0 = Instant.now().getEpochSecond
+        logger.info("Start writing repeaters statistics")
+        writeRepeaters()
+        logger.info(s"Write repeaters finish in ${Instant.now().getEpochSecond - t0} seconds")
       }
     }.start()
   }

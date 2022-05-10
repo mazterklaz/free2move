@@ -10,7 +10,8 @@ case class AppConfig(customerPath: String,
                      startDate: String,
                      endDate: String,
                      customerSpendingStatisticsPath: String,
-                     customerOrdersStatisticsPath: String
+                     customerOrdersStatisticsPath: String,
+                     customerRepeatersStatisticsPath: String
                     )
 
 object AppConfig {

@@ -1,5 +1,6 @@
 package main
 
+import com.typesafe.scalalogging.LazyLogging
 import config.{AppConfig, SparkConfig}
 import data.customer.io.CustomerReader
 import data.customer.model.Customer
@@ -12,7 +13,7 @@ import data.product.model.Products
 import data.statistics.{CustomerStatistics, Statistics}
 import org.apache.spark.sql.{Dataset, SparkSession}
 
-object Free2MoveApp extends App {
+object Free2MoveApp extends App with LazyLogging {
 
   implicit val appConfig: AppConfig = AppConfig()
 
@@ -33,5 +34,6 @@ object Free2MoveApp extends App {
   val customerStatistics = new CustomerStatistics(statistics.itemOrderCustomer.toDS, appConfig)
 
   customerStatistics.writeAll()
+
 
 }
