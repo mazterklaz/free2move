@@ -70,7 +70,7 @@ class CustomerStatistics(dataset: Dataset[(Item, Order, Customer)], appConfig: A
     new Thread {
       override def run(): Unit = {
         val t0 = Instant.now().getEpochSecond
-        logger.info("Start writing spending statistics")
+        logger.info(s"Start writing spending statistics from ${appConfig.startDate} to ${appConfig.endDate}")
         writeSpending()
         logger.info(s"Write spending finish in ${Instant.now().getEpochSecond - t0} seconds")
       }
@@ -79,7 +79,7 @@ class CustomerStatistics(dataset: Dataset[(Item, Order, Customer)], appConfig: A
     new Thread {
       override def run(): Unit = {
         val t0 = Instant.now().getEpochSecond
-        logger.info("Start writing orders statistics")
+        logger.info(s"Start writing orders statistics from ${appConfig.startDate} to ${appConfig.endDate}")
         writeOrders()
         logger.info(s"Write orders finish in ${Instant.now().getEpochSecond - t0} seconds")
       }
@@ -88,7 +88,7 @@ class CustomerStatistics(dataset: Dataset[(Item, Order, Customer)], appConfig: A
     new Thread {
       override def run(): Unit = {
         val t0 = Instant.now().getEpochSecond
-        logger.info("Start writing repeaters statistics")
+        logger.info(s"Start writing repeaters statistics from ${appConfig.startDate} to ${appConfig.endDate}")
         writeRepeaters()
         logger.info(s"Write repeaters finish in ${Instant.now().getEpochSecond - t0} seconds")
       }

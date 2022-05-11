@@ -8,7 +8,7 @@ object SparkConfig {
   val sparkConf = new SparkConf()
     .set("spark.sql.sources.partitionOverwriteMode", "dynamic")
     .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-    .set("spark.scheduler.mode", "FAIR")
+//    .set("spark.scheduler.mode", "FAIR")
 
   def sparkSession(isLocal: Boolean): SparkSession = if(isLocal)
     SparkSession
